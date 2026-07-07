@@ -16,7 +16,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class ProjetosApplication {
 
 	public static void main(String[] args) {
-		 
+		String userHome = System.getProperty("user.home");
+		java.io.File dir = new java.io.File(userHome + "/.creatorsdeck");
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
 		SpringApplication.run(ProjetosApplication.class, args);
 	}
 

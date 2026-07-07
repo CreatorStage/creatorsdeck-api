@@ -15,6 +15,16 @@ public class DatabaseCleanupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        try (java.sql.Connection conn = jdbcTemplate.getDataSource().getConnection()) {
+            String dbName = conn.getMetaData().getDatabaseProductName();
+            if (dbName != null && dbName.toLowerCase().contains("sqlite")) {
+                log.info("Banco de dados SQLite detectado. Ignorando limpeza de dados legados do PostgreSQL.");
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Não foi possível verificar o nome do banco de dados: {}", e.getMessage());
+        }
+
         log.info("Iniciando limpeza de dados legados vazios no banco de dados...");
         try {
             // Corrige campos vazios que quebram a desserialização de JSON pelo Jackson

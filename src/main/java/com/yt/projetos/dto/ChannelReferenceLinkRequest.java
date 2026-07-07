@@ -7,6 +7,7 @@ public record ChannelReferenceLinkRequest(
         String url,
         String note,
         String thumbnailUrl,
-        ReferenceType type
+        ReferenceType type,
+        String scrapeChannelUrl
 ) {
 }

@@ -12,6 +12,8 @@ public record ChannelResponse(
         List<String> ctaTemplates,
         String descriptionBlocks,
         String checklistTemplates,
+        String description,
+        String channelUrl,
         LocalDateTime createdAt,
         LocalDateTime deletedAt
 ) {

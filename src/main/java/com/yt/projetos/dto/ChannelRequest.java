@@ -12,5 +12,7 @@ public record ChannelRequest(
         
         List<String> ctaTemplates,
         String descriptionBlocks,
-        String checklistTemplates
+        String checklistTemplates,
+        String description,
+        String channelUrl
 ) {}

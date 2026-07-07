@@ -53,6 +53,8 @@ public class ChannelService {
                 .ctaTemplates(request.ctaTemplates() != null ? request.ctaTemplates() : new java.util.ArrayList<>())
                 .descriptionBlocks(request.descriptionBlocks())
                 .checklistTemplates(request.checklistTemplates())
+                .description(request.description())
+                .channelUrl(request.channelUrl())
                 .user(currentUser)
                 .build();
         return channelRepository.save(channel);
@@ -70,6 +72,8 @@ public class ChannelService {
         if (updates.ctaTemplates() != null) channel.setCtaTemplates(updates.ctaTemplates());
         if (updates.descriptionBlocks() != null) channel.setDescriptionBlocks(updates.descriptionBlocks());
         if (updates.checklistTemplates() != null) channel.setChecklistTemplates(updates.checklistTemplates());
+        if (updates.description() != null) channel.setDescription(updates.description());
+        if (updates.channelUrl() != null) channel.setChannelUrl(updates.channelUrl());
         return channelRepository.save(channel);
     }
 
@@ -92,11 +96,33 @@ public class ChannelService {
                 .build();
         ChannelReferenceLink saved = channelReferenceLinkRepository.save(link);
         
-        if (request.url() != null && (request.url().contains("youtube.com/@") || request.url().contains("youtube.com/channel/") || request.url().contains("youtube.com/c/"))) {
-            suggestionService.scrapeSuggestionsForChannel(channel, request.url(), request.title());
+        String channelUrlToScrape = request.scrapeChannelUrl();
+        if (channelUrlToScrape == null || channelUrlToScrape.trim().isEmpty()) {
+            if (request.url() != null && (request.url().contains("youtube.com/@") || request.url().contains("youtube.com/channel/") || request.url().contains("youtube.com/c/"))) {
+                channelUrlToScrape = request.url();
+            }
+        }
+        
+        if (channelUrlToScrape != null && !channelUrlToScrape.trim().isEmpty()) {
+            suggestionService.scrapeSuggestionsForChannel(channel, channelUrlToScrape, request.title());
         }
         
         return saved;
+    }
+
+    @Transactional
+    public ChannelReferenceLink updateReferenceLink(User currentUser, UUID id, ChannelReferenceLinkRequest updates) {
+        ChannelReferenceLink link = channelReferenceLinkRepository.findById(id)
+                .filter(found -> isOwnedChannel(currentUser, found.getChannel() != null ? found.getChannel().getId() : null))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        if (updates.title() != null) link.setTitle(updates.title());
+        if (updates.url() != null) link.setUrl(updates.url());
+        if (updates.note() != null) link.setNote(updates.note());
+        if (updates.thumbnailUrl() != null) link.setThumbnailUrl(updates.thumbnailUrl());
+        if (updates.type() != null) link.setType(updates.type());
+
+        return channelReferenceLinkRepository.save(link);
     }
 
     public void deleteReferenceLink(User currentUser, UUID id) {

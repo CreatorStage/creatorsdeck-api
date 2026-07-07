@@ -65,6 +65,11 @@ public class ChannelController {
         return ResponseEntity.status(201).body(toReferenceLinkResponse(channelService.addReferenceLink(currentUser, channelId, request)));
     }
 
+    @PutMapping("/reference-links/{id}")
+    public ResponseEntity<ChannelReferenceLinkResponse> updateReferenceLink(@AuthenticationPrincipal User currentUser, @PathVariable UUID id, @RequestBody ChannelReferenceLinkRequest request) {
+        return ResponseEntity.ok(toReferenceLinkResponse(channelService.updateReferenceLink(currentUser, id, request)));
+    }
+
     @DeleteMapping("/reference-links/{id}")
     public ResponseEntity<?> deleteReferenceLink(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
         channelService.deleteReferenceLink(currentUser, id);
@@ -86,6 +91,8 @@ public class ChannelController {
                 channel.getCtaTemplates(),
                 channel.getDescriptionBlocks(),
                 channel.getChecklistTemplates(),
+                channel.getDescription(),
+                channel.getChannelUrl(),
                 channel.getCreatedAt(),
                 channel.getDeletedAt()
         );

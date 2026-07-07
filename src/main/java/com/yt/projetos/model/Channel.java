@@ -43,6 +43,9 @@ public class Channel {
     @Column(nullable = false)
     private String niche;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Builder.Default
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "cta_templates", columnDefinition = "jsonb")
@@ -55,6 +58,9 @@ public class Channel {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "checklist_templates", columnDefinition = "jsonb")
     private String checklistTemplates;
+
+    @Column(name = "channel_url", columnDefinition = "TEXT")
+    private String channelUrl;
 
     @org.hibernate.annotations.CreationTimestamp
     @Column(updatable = false)
