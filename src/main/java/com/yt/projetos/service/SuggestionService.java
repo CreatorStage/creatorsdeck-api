@@ -35,10 +35,7 @@ public class SuggestionService {
     public void scrapeSuggestionsForChannel(Channel channel, String sourceChannelUrl, String sourceChannelName, boolean force) {
         log.info("Iniciando publicação de solicitação de scraping para URL: {} (force={})", sourceChannelUrl, force);
 
-        if (force) {
-            log.info("Forçando sincronização: deletando sugestões antigas de {} para o canal {}", sourceChannelUrl, channel.getId());
-            suggestedVideoRepository.deleteBySourceChannelUrlAndChannelId(sourceChannelUrl, channel.getId());
-        } else {
+        if (!force) {
             // Verifica se já não existem sugestões deste canal (evita duplicidade)
             if (suggestedVideoRepository.existsBySourceChannelUrlAndChannelId(sourceChannelUrl, channel.getId())) {
                 log.info("Já existem sugestões do canal {} para o channel_id {}. Pulando publicação.", sourceChannelUrl, channel.getId());
@@ -69,11 +66,8 @@ public class SuggestionService {
             return;
         }
 
-        // Verifica se já não existem sugestões deste canal (evita duplicidade de inserção assíncrona tardia)
-        if (suggestedVideoRepository.existsBySourceChannelUrlAndChannelId(sourceChannelUrl, channelId)) {
-            log.info("Já existem sugestões do canal {} para o channel_id {}. Pulando salvamento.", sourceChannelUrl, channelId);
-            return;
-        }
+        // Sobrescreve as sugestões antigas do canal, se existirem (para que a sincronização seja perfeita e atômica)
+        suggestedVideoRepository.deleteBySourceChannelUrlAndChannelId(sourceChannelUrl, channelId);
 
         java.util.List<SuggestedVideo> listToSave = new java.util.ArrayList<>();
         for (Map<String, String> videoData : videosData) {
