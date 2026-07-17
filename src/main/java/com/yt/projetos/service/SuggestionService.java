@@ -157,24 +157,32 @@ public class SuggestionService {
             return null;
         }
         try {
-            String clean = viewsStr.toLowerCase()
-                    .replaceAll("[^a-z0-9,\\.]", ""); // Keep only numbers, comma, dot, and suffixes (k, m, b, mi, bi)
+            // Match the number and an optional multiplier (mil, mi, bi, k, m, b)
+            Pattern pattern = Pattern.compile("([\\d.,]+)\\s*(mil|mi|bi|k|m|b)?(?:\\s|$|[^a-z])", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(viewsStr);
+            if (!matcher.find()) return null;
             
-            double multiplier = 1.0;
-            if (clean.contains("bi") || clean.contains("b")) {
-                multiplier = 1_000_000_000.0;
-                clean = clean.replaceAll("[a-z]", "");
-            } else if (clean.contains("mi") || clean.contains("m")) {
-                multiplier = 1_000_000.0;
-                clean = clean.replaceAll("[a-z]", "");
-            } else if (clean.contains("k")) {
-                multiplier = 1_000.0;
-                clean = clean.replaceAll("[a-z]", "");
+            String numStr = matcher.group(1);
+            String multiplierStr = matcher.group(2) != null ? matcher.group(2).toLowerCase() : null;
+            
+            if (numStr.contains(",")) {
+                numStr = numStr.replace(".", "").replace(",", ".");
+            } else {
+                numStr = numStr.replaceAll("\\.(\\d{3})", "$1");
             }
             
-            clean = clean.replace(".", "").replace(",", ".");
-            double parsedVal = Double.parseDouble(clean);
-            return (long) (parsedVal * multiplier);
+            double num = Double.parseDouble(numStr);
+            
+            if (multiplierStr != null) {
+                if (multiplierStr.equals("mil") || multiplierStr.equals("k")) {
+                    num *= 1_000.0;
+                } else if (multiplierStr.equals("mi") || multiplierStr.equals("m")) {
+                    num *= 1_000_000.0;
+                } else if (multiplierStr.equals("bi") || multiplierStr.equals("b")) {
+                    num *= 1_000_000_000.0;
+                }
+            }
+            return (long) num;
         } catch (Exception e) {
             return null;
         }
