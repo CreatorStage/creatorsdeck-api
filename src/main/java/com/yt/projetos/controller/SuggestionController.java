@@ -89,7 +89,7 @@ public class SuggestionController {
         for (ChannelReferenceLink ref : refs) {
             String url = ref.getUrl();
             if (url != null && (url.contains("youtube.com/@") || url.contains("youtube.com/channel/") || url.contains("youtube.com/c/"))) {
-                suggestionService.scrapeSuggestionsForChannel(channel, url, ref.getTitle());
+                suggestionService.scrapeSuggestionsForChannel(channel, url, ref.getTitle(), true);
                 queued++;
             }
         }

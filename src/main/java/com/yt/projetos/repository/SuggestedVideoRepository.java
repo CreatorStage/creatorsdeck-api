@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface SuggestedVideoRepository extends JpaRepository<SuggestedVideo, UUID> {
     List<SuggestedVideo> findByChannelIdOrderByCreatedAtDesc(UUID channelId);
     boolean existsBySourceChannelUrlAndChannelId(String sourceChannelUrl, UUID channelId);
+    void deleteBySourceChannelUrlAndChannelId(String sourceChannelUrl, UUID channelId);
 }

@@ -104,7 +104,7 @@ public class ChannelService {
         }
         
         if (channelUrlToScrape != null && !channelUrlToScrape.trim().isEmpty()) {
-            suggestionService.scrapeSuggestionsForChannel(channel, channelUrlToScrape, request.title());
+            suggestionService.scrapeSuggestionsForChannel(channel, channelUrlToScrape, request.title(), false);
         }
         
         return saved;

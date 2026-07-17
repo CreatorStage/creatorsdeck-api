@@ -31,14 +31,19 @@ public class SuggestionService {
     private final ChannelRepository channelRepository;
     private final RabbitTemplate rabbitTemplate;
 
-    @Async
-    public void scrapeSuggestionsForChannel(Channel channel, String sourceChannelUrl, String sourceChannelName) {
-        log.info("Iniciando publicação de solicitação de scraping para URL: {}", sourceChannelUrl);
+    @Transactional
+    public void scrapeSuggestionsForChannel(Channel channel, String sourceChannelUrl, String sourceChannelName, boolean force) {
+        log.info("Iniciando publicação de solicitação de scraping para URL: {} (force={})", sourceChannelUrl, force);
 
-        // Verifica se já não existem sugestões deste canal (evita duplicidade)
-        if (suggestedVideoRepository.existsBySourceChannelUrlAndChannelId(sourceChannelUrl, channel.getId())) {
-            log.info("Já existem sugestões do canal {} para o channel_id {}. Pulando publicação.", sourceChannelUrl, channel.getId());
-            return;
+        if (force) {
+            log.info("Forçando sincronização: deletando sugestões antigas de {} para o canal {}", sourceChannelUrl, channel.getId());
+            suggestedVideoRepository.deleteBySourceChannelUrlAndChannelId(sourceChannelUrl, channel.getId());
+        } else {
+            // Verifica se já não existem sugestões deste canal (evita duplicidade)
+            if (suggestedVideoRepository.existsBySourceChannelUrlAndChannelId(sourceChannelUrl, channel.getId())) {
+                log.info("Já existem sugestões do canal {} para o channel_id {}. Pulando publicação.", sourceChannelUrl, channel.getId());
+                return;
+            }
         }
 
         try {
