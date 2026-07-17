@@ -77,4 +77,13 @@ public class SuggestedVideo {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "published_at")
+    private String publishedAt;
+
+    @Column(name = "precise_views_count")
+    private Long preciseViewsCount;
+
+    @Column(name = "precise_data_collected")
+    private Boolean preciseDataCollected = false;
 }

@@ -93,6 +93,22 @@ public class SuggestionService {
         }
         suggestedVideoRepository.saveAll(listToSave);
         log.info("Processo de sugestão finalizado. {} vídeos salvos no banco.", videosData.size());
+
+        // Despacha para o novo scraper os vídeos com mais de 25.000 visualizações
+        for (SuggestedVideo sv : listToSave) {
+            if (sv.getViewsCount() != null && sv.getViewsCount() > 25000) {
+                try {
+                    Map<String, Object> detailsMessage = Map.of(
+                        "videoId", sv.getId().toString(),
+                        "videoUrl", sv.getUrl()
+                    );
+                    rabbitTemplate.convertAndSend(RabbitMQConfig.VIDEO_DETAILS_REQUESTS_QUEUE, detailsMessage);
+                    log.info("Solicitação de detalhes enviada para o vídeo {} (views: {})", sv.getId(), sv.getViewsCount());
+                } catch (Exception e) {
+                    log.error("Erro ao publicar solicitação de detalhes para o vídeo {}: ", sv.getId(), e);
+                }
+            }
+        }
     }
 
     public List<SuggestedVideo> getSuggestionsForChannel(java.util.UUID channelId) {
